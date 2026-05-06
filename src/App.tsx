@@ -11,17 +11,84 @@ import {
   Mail, 
   Code2, 
   Cpu, 
-  Gamepad2, 
   ChevronRight,
   Download,
   Menu,
   X
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useState, useEffect } from "react";
+import profileImage from "../profile.jpg";
 
 // --- Components ---
 
-const Navbar = () => {
+const HOME_PATH = "/";
+const PROJECTS_PATH = "/projects";
+
+type Project = {
+  title: string;
+  desc: string;
+  tags: string[];
+  icon: LucideIcon;
+  demoUrl?: string;
+  codeUrl?: string;
+};
+
+const projects: Project[] = [
+  {
+    title: "HR Automation System",
+    desc: "An application automation system that scans incoming emails, extracts resume data, stores applicant details, sends screening links, and follows up after 2 days if there is no response.",
+    tags: ["Email Automation", "Resume Parsing", "Follow-up Workflow"],
+    icon: Cpu,
+    codeUrl: "https://github.com/boi-daaniel/aira-frontend",
+    demoUrl: "https://aira-front-end.vercel.app/",
+  },
+  {
+    title: "Web Development Project",
+    desc: "A scalable full-stack application built with React and modern backend technologies for high performance.",
+    tags: ["React", "Tailwind", "Supabase"],
+    icon: Code2,
+  },
+  {
+    title: "Personal Allowance & Expense Tracker",
+    desc: "A personal allowance and expense tracker with a private dashboard for logging entries and visualizing spending by category.",
+    tags: ["React", "Tailwind CSS", "Supabase"],
+    icon: Code2,
+    codeUrl: "https://github.com/boi-daaniel/off-track",
+    demoUrl: "https://off-track-liard.vercel.app/",
+  },
+];
+
+const scrollToSectionById = (sectionId: string) => {
+  const target = document.getElementById(sectionId);
+  if (!target) return;
+
+  const headerOffset = 96;
+  const targetPosition = target.getBoundingClientRect().top + window.scrollY - headerOffset;
+
+  return window.scrollTo({
+    top: Math.max(targetPosition, 0),
+    behavior: "smooth",
+  });
+};
+
+const getSectionFromHash = () => {
+  if (!window.location.hash || window.location.hash === "#") {
+    return "hero";
+  }
+
+  return window.location.hash.slice(1);
+};
+
+const Navbar = ({
+  currentPath,
+  onNavigateHome,
+  onNavigateProjects,
+}: {
+  currentPath: string;
+  onNavigateHome: (sectionId: string) => void;
+  onNavigateProjects: () => void;
+}) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -32,11 +99,12 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { name: "About", href: "#about" },
-    { name: "Projects", href: "#projects" },
-    { name: "Skills", href: "#skills" },
-    { name: "Education", href: "#education" },
-    { name: "Contact", href: "#contact" },
+    { name: "Home", sectionId: "hero" },
+    { name: "About", sectionId: "about" },
+    { name: "Projects", path: PROJECTS_PATH },
+    { name: "Skills", sectionId: "skills" },
+    { name: "Education", sectionId: "education" },
+    { name: "Contact", sectionId: "contact" },
   ];
 
   return (
@@ -47,7 +115,12 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         <motion.a 
-          href="#"
+          href={HOME_PATH}
+          onClick={(event) => {
+            event.preventDefault();
+            setIsMobileMenuOpen(false);
+            onNavigateHome("hero");
+          }}
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="text-xl font-bold tracking-tighter"
@@ -60,11 +133,23 @@ const Navbar = () => {
           {navLinks.map((link, i) => (
             <motion.a
               key={link.name}
-              href={link.href}
+              href={link.path ?? `${HOME_PATH}#${link.sectionId}`}
+              onClick={(event) => {
+                event.preventDefault();
+
+                if (link.path) {
+                  onNavigateProjects();
+                  return;
+                }
+
+                onNavigateHome(link.sectionId!);
+              }}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
+              className={`text-sm font-medium transition-colors ${
+                currentPath === link.path ? "text-white" : "text-gray-400 hover:text-white"
+              }`}
             >
               {link.name}
             </motion.a>
@@ -93,8 +178,19 @@ const Navbar = () => {
               {navLinks.map((link) => (
                 <a
                   key={link.name}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  href={link.path ?? `${HOME_PATH}#${link.sectionId}`}
+                  onClick={(event) => {
+                    setIsMobileMenuOpen(false);
+
+                    event.preventDefault();
+
+                    if (link.path) {
+                      onNavigateProjects();
+                      return;
+                    }
+
+                    onNavigateHome(link.sectionId!);
+                  }}
                   className="text-lg text-gray-400 hover:text-white transition-colors"
                 >
                   {link.name}
@@ -129,7 +225,7 @@ const TypingAnimation = ({ text }: { text: string }) => {
   );
 };
 
-const Hero = () => {
+const Hero = ({ onNavigateHome }: { onNavigateHome: (sectionId: string) => void }) => {
   return (
     <section id="hero" className="min-h-screen flex items-center justify-center pt-20 px-6">
       <div className="max-w-4xl text-center">
@@ -153,13 +249,21 @@ const Hero = () => {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a 
-              href="#projects"
+              href={`${HOME_PATH}#projects`}
+              onClick={(event) => {
+                event.preventDefault();
+                onNavigateHome("projects");
+              }}
               className="px-8 py-4 bg-white text-black font-semibold rounded-full hover:bg-gray-200 transition-all transform hover:scale-105"
             >
               View Projects
             </a>
             <a 
-              href="#contact"
+              href={`${HOME_PATH}#contact`}
+              onClick={(event) => {
+                event.preventDefault();
+                onNavigateHome("contact");
+              }}
               className="px-8 py-4 bg-transparent border border-white/20 text-white font-semibold rounded-full hover:bg-white/5 transition-all"
             >
               Contact Me
@@ -184,9 +288,11 @@ const About = () => {
           >
             <div className="aspect-square bg-gray-900 rounded-2xl overflow-hidden border border-white/5 relative group">
               <div className="absolute inset-0 bg-gradient-to-tr from-brand-accent/20 to-transparent transition-opacity group-hover:opacity-100 opacity-0" />
-              <div className="flex items-center justify-center h-full">
-                <Code2 size={120} className="text-white/10 group-hover:text-white/20 transition-colors" />
-              </div>
+              <img
+                src={profileImage}
+                alt="Profile"
+                className="h-full w-full object-cover"
+              />
             </div>
             <div className="absolute -bottom-6 -right-6 h-32 w-32 bg-brand-accent/10 blur-3xl rounded-full" />
           </motion.div>
@@ -222,7 +328,22 @@ const About = () => {
   );
 };
 
-const ProjectCard = ({ title, desc, tags, icon: Icon, delay }: any) => {
+type ProjectCardProps = Project & {
+  delay: number;
+  key?: string;
+};
+
+const ProjectCard = (props: ProjectCardProps) => {
+  const {
+    title,
+    desc,
+    tags,
+    icon: Icon,
+    delay,
+    demoUrl,
+    codeUrl,
+  } = props;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -246,10 +367,20 @@ const ProjectCard = ({ title, desc, tags, icon: Icon, delay }: any) => {
       </div>
 
       <div className="flex items-center space-x-4">
-        <a href="#" className="flex items-center text-xs font-semibold text-gray-400 hover:text-white transition-colors">
+        <a
+          href={codeUrl ?? "#"}
+          target={codeUrl ? "_blank" : undefined}
+          rel={codeUrl ? "noreferrer" : undefined}
+          className="flex items-center text-xs font-semibold text-gray-400 hover:text-white transition-colors"
+        >
           <Github size={16} className="mr-1.5" /> Code
         </a>
-        <a href="#" className="flex items-center text-xs font-semibold text-gray-400 hover:text-white transition-colors">
+        <a
+          href={demoUrl ?? "#"}
+          target={demoUrl ? "_blank" : undefined}
+          rel={demoUrl ? "noreferrer" : undefined}
+          className="flex items-center text-xs font-semibold text-gray-400 hover:text-white transition-colors"
+        >
           <ExternalLink size={16} className="mr-1.5" /> Demo
         </a>
       </div>
@@ -257,28 +388,7 @@ const ProjectCard = ({ title, desc, tags, icon: Icon, delay }: any) => {
   );
 };
 
-const Projects = () => {
-  const projects = [
-    {
-      title: "AI Automation System",
-      desc: "An intelligent workflow automation tool utilizing LLMs to streamline repetitive business processes.",
-      tags: ["Python", "OpenAI API", "Node.js"],
-      icon: Cpu,
-    },
-    {
-      title: "Web Development Project",
-      desc: "A scalable full-stack application built with React and modern backend technologies for high performance.",
-      tags: ["React", "Tailwind", "Supabase"],
-      icon: Code2,
-    },
-    {
-      title: "Horror Game (Unity)",
-      desc: "An immersive first-person horror experience focusing on atmospheric design and psychological elements.",
-      tags: ["Unity", "C#", "3D Modeling"],
-      icon: Gamepad2,
-    },
-  ];
-
+const Projects = ({ onNavigateProjects }: { onNavigateProjects: () => void }) => {
   return (
     <section id="projects" className="py-24 px-6">
       <div className="max-w-7xl mx-auto">
@@ -287,18 +397,83 @@ const Projects = () => {
             <h2 className="text-3xl font-bold mb-2">Featured Projects</h2>
             <p className="text-gray-500">A selection of my recent work in web, AI, and game development.</p>
           </div>
-          <a href="#" className="text-brand-accent font-medium flex items-center hover:underline">
+          <a
+            href={PROJECTS_PATH}
+            onClick={(event) => {
+              event.preventDefault();
+              onNavigateProjects();
+            }}
+            className="text-brand-accent font-medium flex items-center hover:underline"
+          >
             View Archive <ChevronRight size={18} className="ml-1" />
           </a>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project, i) => (
-            <ProjectCard key={project.title} {...project} delay={i * 0.1} />
+            <ProjectCard
+              key={project.title}
+              title={project.title}
+              desc={project.desc}
+              tags={project.tags}
+              icon={project.icon}
+              codeUrl={project.codeUrl}
+              demoUrl={project.demoUrl}
+              delay={i * 0.1}
+            />
           ))}
         </div>
       </div>
     </section>
+  );
+};
+
+const ProjectsPage = ({ onNavigateHome }: { onNavigateHome: (sectionId: string) => void }) => {
+  return (
+    <main className="pt-32 pb-24 px-6 min-h-screen">
+      <section className="max-w-7xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-16 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6"
+        >
+          <div className="max-w-3xl">
+            <span className="text-brand-accent text-sm font-semibold tracking-[0.3em] uppercase mb-4 block">
+              Project Archive
+            </span>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">All Projects</h1>
+            <p className="text-lg text-gray-400 leading-relaxed">
+              A complete list of portfolio work across automation, web applications, and product-focused builds.
+            </p>
+          </div>
+          <a
+            href={`${HOME_PATH}#contact`}
+            onClick={(event) => {
+              event.preventDefault();
+              onNavigateHome("contact");
+            }}
+            className="inline-flex items-center justify-center px-6 py-3 rounded-full border border-white/10 text-sm font-semibold text-white hover:bg-white/5 transition-colors"
+          >
+            Start a Conversation
+          </a>
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {projects.map((project, index) => (
+            <ProjectCard
+              key={project.title}
+              title={project.title}
+              desc={project.desc}
+              tags={project.tags}
+              icon={project.icon}
+              codeUrl={project.codeUrl}
+              demoUrl={project.demoUrl}
+              delay={index * 0.08}
+            />
+          ))}
+        </div>
+      </section>
+    </main>
   );
 };
 
@@ -405,10 +580,20 @@ const Contact = () => {
               </a>
               
               <div className="flex space-x-4 pt-4">
-                <a href="#" className="h-12 w-12 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
+                <a
+                  href="https://github.com/boi-daaniel"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="h-12 w-12 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+                >
                   <Github size={20} className="text-gray-400 hover:text-white" />
                 </a>
-                <a href="#" className="h-12 w-12 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
+                <a
+                  href="https://www.linkedin.com/in/jose-danielle-inocentes-6ab887357"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="h-12 w-12 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+                >
                   <Linkedin size={20} className="text-gray-400 hover:text-white" />
                 </a>
               </div>
@@ -465,17 +650,67 @@ const Footer = () => {
 };
 
 export default function App() {
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  const [pendingSectionId, setPendingSectionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const syncRoute = () => {
+      setCurrentPath(window.location.pathname);
+      setPendingSectionId(window.location.pathname === HOME_PATH ? getSectionFromHash() : null);
+    };
+
+    syncRoute();
+    window.addEventListener("popstate", syncRoute);
+
+    return () => window.removeEventListener("popstate", syncRoute);
+  }, []);
+
+  useEffect(() => {
+    if (currentPath !== HOME_PATH || !pendingSectionId) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      scrollToSectionById(pendingSectionId);
+      setPendingSectionId(null);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [currentPath, pendingSectionId]);
+
+  const navigateToProjects = () => {
+    window.history.pushState({}, "", PROJECTS_PATH);
+    setCurrentPath(PROJECTS_PATH);
+    setPendingSectionId(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const navigateHome = (sectionId: string) => {
+    const nextUrl = sectionId === "hero" ? HOME_PATH : `${HOME_PATH}#${sectionId}`;
+    window.history.pushState({}, "", nextUrl);
+    setCurrentPath(HOME_PATH);
+    setPendingSectionId(sectionId);
+  };
+
+  const isProjectsPage = currentPath === PROJECTS_PATH;
+
   return (
     <div className="selection:bg-brand-accent/30 selection:text-white">
-      <Navbar />
-      <main>
-        <Hero />
-        <About />
-        <Projects />
-        <Skills />
-        <Education />
-        <Contact />
-      </main>
+      <Navbar
+        currentPath={currentPath}
+        onNavigateHome={navigateHome}
+        onNavigateProjects={navigateToProjects}
+      />
+      {isProjectsPage ? (
+        <ProjectsPage onNavigateHome={navigateHome} />
+      ) : (
+        <main>
+          <Hero onNavigateHome={navigateHome} />
+          <About />
+          <Projects onNavigateProjects={navigateToProjects} />
+          <Skills />
+          <Education />
+          <Contact />
+        </main>
+      )}
       <Footer />
     </div>
   );
