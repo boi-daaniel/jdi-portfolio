@@ -222,20 +222,19 @@ const Navbar = ({
 
 const TypingAnimation = ({ text }: { text: string }) => {
   const [displayText, setDisplayText] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    if (currentIndex < text.length) {
-      const timeout = setTimeout(() => {
-        setDisplayText((prev) => prev + text[currentIndex]);
-        setCurrentIndex((prev) => prev + 1);
-      }, 50);
-      return () => clearTimeout(timeout);
-    }
-  }, [currentIndex, text]);
+    if (displayText.length >= text.length) return;
+
+    const timeout = setTimeout(() => {
+      setDisplayText(text.slice(0, displayText.length + 1));
+    }, 50);
+
+    return () => clearTimeout(timeout);
+  }, [displayText, text]);
 
   return (
-    <span className="border-r-2 border-brand-accent pr-1 cursor-pulse">
+    <span className="border-r-2 border-brand-accent pr-1">
       {displayText}
     </span>
   );
@@ -255,7 +254,7 @@ const Hero = ({ onNavigateHome }: { onNavigateHome: (sectionId: string) => void 
             Welcome to my portfolio
           </span>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
-            I'm <span className="text-gradient">Jose Danielle Inocentes</span>
+            I'm <span className="text-white">Jose Danielle Inocentes</span>
           </h1>
           <div className="text-xl md:text-2xl text-gray-400 font-medium mb-8 min-h-[3rem]">
             <TypingAnimation text="Aspiring Software Developer | Web Developer | AI Automation Enthusiast" />
@@ -296,7 +295,7 @@ const About = () => {
   return (
     <section id="about" className="py-24 px-6 bg-black/50">
       <div className="max-w-5xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
+        <div className="grid md:grid-cols-2 gap-16 items-end">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -318,13 +317,17 @@ const About = () => {
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
+            className="flex h-full"
           >
-            <h2 className="text-3xl font-bold mb-6">About Me</h2>
-            <div className="space-y-6 text-gray-400 text-lg leading-relaxed">
-              <p>
-                I am a passionate aspiring developer with a strong focus on building practical applications that solve real-world problems. My journey in tech is driven by curiosity and a commitment to continuous learning.
-              </p>
-              <div className="p-4 bg-white/5 border border-white/5 rounded-xl space-y-4">
+            <div className="flex flex-1 flex-col">
+              <div className="space-y-6 text-gray-400 text-lg leading-relaxed">
+                <h2 className="text-3xl font-bold text-white">About Me</h2>
+                <p>
+                  I am a passionate aspiring developer with a strong focus on building practical applications that solve real-world problems. My journey in tech is driven by curiosity and a commitment to continuous learning. Whether it's optimizing a web interface or automating a workflow with AI, I aim for clean code and high performance in every project I undertake.
+                </p>
+              </div>
+              <div className="h-8 shrink-0 md:h-10" />
+              <div className="mt-auto p-4 bg-white/5 border border-white/5 rounded-xl space-y-4">
                 <a
                   href="mailto:daniel.inocentes30@gmail.com"
                   className="flex items-start gap-3 hover:text-white transition-colors"
@@ -360,9 +363,6 @@ const About = () => {
                   </div>
                 </a>
               </div>
-              <p>
-                Whether it's optimizing a web interface or automating a workflow with AI, I aim for clean code and high performance in every project I undertake.
-              </p>
             </div>
           </motion.div>
         </div>
