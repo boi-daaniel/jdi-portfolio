@@ -9,16 +9,19 @@ import {
   Linkedin, 
   ExternalLink, 
   Mail, 
+  Instagram,
   Code2, 
   Cpu, 
   ChevronRight,
   Download,
   Menu,
-  X
+  X,
+  Facebook
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useState, useEffect } from "react";
-import profileImage from "../profile.jpg";
+import DarkVeil from "./components/DarkVeil";
+import profileImage from "../profile2.jpg";
 
 // --- Components ---
 
@@ -42,12 +45,6 @@ const projects: Project[] = [
     icon: Cpu,
     codeUrl: "https://github.com/boi-daaniel/aira-frontend",
     demoUrl: "https://aira-front-end.vercel.app/",
-  },
-  {
-    title: "Web Development Project",
-    desc: "A scalable full-stack application built with React and modern backend technologies for high performance.",
-    tags: ["React", "Tailwind", "Supabase"],
-    icon: Code2,
   },
   {
     title: "Personal Allowance & Expense Tracker",
@@ -78,6 +75,25 @@ const getSectionFromHash = () => {
   }
 
   return window.location.hash.slice(1);
+};
+
+const HeroVeil = () => {
+  return (
+    <div className="absolute inset-0 -z-20 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0">
+        <DarkVeil
+          hueShift={12}
+          noiseIntensity={0.015}
+          scanlineIntensity={0.08}
+          speed={0.35}
+          scanlineFrequency={1.8}
+          warpAmount={0.12}
+          resolutionScale={0.8}
+        />
+      </div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.16),transparent_38%),linear-gradient(180deg,rgba(0,0,0,0.18),rgba(0,0,0,0.72))]" />
+    </div>
+  );
 };
 
 const Navbar = ({
@@ -227,7 +243,8 @@ const TypingAnimation = ({ text }: { text: string }) => {
 
 const Hero = ({ onNavigateHome }: { onNavigateHome: (sectionId: string) => void }) => {
   return (
-    <section id="hero" className="min-h-screen flex items-center justify-center pt-20 px-6">
+    <section id="hero" className="relative isolate min-h-screen flex items-center justify-center pt-20 px-6 overflow-hidden">
+      <HeroVeil />
       <div className="max-w-4xl text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -307,15 +324,41 @@ const About = () => {
               <p>
                 I am a passionate aspiring developer with a strong focus on building practical applications that solve real-world problems. My journey in tech is driven by curiosity and a commitment to continuous learning.
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 bg-white/5 border border-white/5 rounded-xl">
-                  <h3 className="text-white font-semibold mb-1">Problem Solver</h3>
-                  <p className="text-sm">Driven by complex challenges and logical solutions.</p>
-                </div>
-                <div className="p-4 bg-white/5 border border-white/5 rounded-xl">
-                  <h3 className="text-white font-semibold mb-1">Tech Explorer</h3>
-                  <p className="text-sm">Always diving into new frameworks and AI tools.</p>
-                </div>
+              <div className="p-4 bg-white/5 border border-white/5 rounded-xl space-y-4">
+                <a
+                  href="mailto:daniel.inocentes30@gmail.com"
+                  className="flex items-start gap-3 hover:text-white transition-colors"
+                >
+                  <Mail size={18} className="mt-1 text-white/80" />
+                  <div>
+                    <h3 className="text-white font-semibold mb-1">Email</h3>
+                    <p className="text-sm">daniel.inocentes30@gmail.com</p>
+                  </div>
+                </a>
+                <a
+                  href="https://www.facebook.com/daanieboi"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-start gap-3 hover:text-white transition-colors"
+                >
+                  <Facebook size={18} className="mt-1 text-white/80" />
+                  <div>
+                    <h3 className="text-white font-semibold mb-1">FB</h3>
+                    <p className="text-sm">facebook.com/daanieboi</p>
+                  </div>
+                </a>
+                <a
+                  href="https://www.instagram.com/daanie_boi/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-start gap-3 hover:text-white transition-colors"
+                >
+                  <Instagram size={18} className="mt-1 text-white/80" />
+                  <div>
+                    <h3 className="text-white font-semibold mb-1">IG</h3>
+                    <p className="text-sm">@daanie_boi</p>
+                  </div>
+                </a>
               </div>
               <p>
                 Whether it's optimizing a web interface or automating a workflow with AI, I aim for clean code and high performance in every project I undertake.
@@ -480,16 +523,16 @@ const ProjectsPage = ({ onNavigateHome }: { onNavigateHome: (sectionId: string) 
 const Skills = () => {
   const skillGroups = [
     {
-      title: "Frontend",
-      skills: ["HTML5", "CSS3", "JavaScript", "React", "Tailwind CSS", "TypeScript"]
+      title: "Programming Languages",
+      skills: ["PHP", "Java", "C", "JavaScript", "SQL", "CSS", "React", "Tailwind CSS", "TypeScript"]
     },
     {
       title: "AI & Tools",
       skills: ["Python", "Git", "Power BI", "Prompt Engineering", "LLM Workflows"]
     },
     {
-      title: "Other",
-      skills: ["Unity", "C#", "Firebase", "Responsive Design"]
+      title: "Soft Skills",
+      skills: ["Project Management", "Communication", "Collaborative", "Great Leader", "Critical Thinking", "Adaptability", "Emotional Intelligence"]
     }
   ];
 

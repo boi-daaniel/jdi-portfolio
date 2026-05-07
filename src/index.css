@@ -10,9 +10,26 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    width: 100%;
+    min-height: 100%;
   }
+
+  body,
+  #root {
+    width: 100%;
+    min-height: 100vh;
+  }
+
   body {
     @apply bg-brand-bg text-gray-200 antialiased font-sans;
+    overflow-x: hidden;
+  }
+
+  main,
+  section,
+  nav,
+  footer {
+    width: 100%;
   }
 
   /* Custom Scrollbar */
