@@ -20,7 +20,11 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useState, useEffect } from "react";
+import BlurText from "./components/BlurText";
+import BorderGlow from "./components/BorderGlow";
 import DarkVeil from "./components/DarkVeil";
+import ScrollFloat from "./components/ScrollFloat";
+import StartupIntro from "./components/StartupIntro";
 import profileImage from "../profile2.jpg";
 
 // --- Components ---
@@ -88,7 +92,7 @@ const HeroVeil = () => {
           speed={0.35}
           scanlineFrequency={1.8}
           warpAmount={0.12}
-          resolutionScale={0.8}
+          resolutionScale={0.6}
         />
       </div>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.16),transparent_38%),linear-gradient(180deg,rgba(0,0,0,0.18),rgba(0,0,0,0.72))]" />
@@ -109,8 +113,13 @@ const Navbar = ({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => {
+      const nextIsScrolled = window.scrollY > 50;
+      setIsScrolled((current) => (current === nextIsScrolled ? current : nextIsScrolled));
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -242,7 +251,7 @@ const TypingAnimation = ({ text }: { text: string }) => {
 
 const Hero = ({ onNavigateHome }: { onNavigateHome: (sectionId: string) => void }) => {
   return (
-    <section id="hero" className="relative isolate min-h-screen flex items-center justify-center pt-20 px-6 overflow-hidden">
+    <section id="hero" className="relative isolate flex min-h-screen items-center justify-center overflow-hidden px-4 pt-24 pb-16 sm:px-6 sm:pt-20">
       <HeroVeil />
       <div className="max-w-4xl text-center">
         <motion.div
@@ -250,27 +259,28 @@ const Hero = ({ onNavigateHome }: { onNavigateHome: (sectionId: string) => void 
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <span className="text-brand-accent text-sm font-semibold tracking-widest uppercase mb-4 block">
-            Welcome to my portfolio
-          </span>
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
-            I'm <span className="text-white">Jose Danielle Inocentes</span>
-          </h1>
-          <div className="text-xl md:text-2xl text-gray-400 font-medium mb-8 min-h-[3rem]">
-            <TypingAnimation text="Aspiring Software Developer | Web Developer | AI Automation Enthusiast" />
+          <BlurText
+            as="h1"
+            text="Jose Danielle Inocentes"
+            delay={110}
+            animateBy="words"
+            direction="top"
+            stepDuration={0.45}
+            rootMargin="-10% 0px"
+            className="mx-auto mb-6 justify-center text-center text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-7xl"
+          />
+          <div className="mb-8 min-h-[4.5rem] text-base font-medium leading-relaxed text-gray-400 sm:min-h-[3.75rem] sm:text-lg md:text-2xl">
+            <TypingAnimation text="Aspiring Software Developer | Web Developer | AI Automation" />
           </div>
-          <p className="text-gray-500 max-w-2xl mx-auto mb-10 text-lg leading-relaxed">
-            I build clean, efficient, and scalable digital solutions, focusing on web development and AI-driven automation.
-          </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
             <a 
               href={`${HOME_PATH}#projects`}
               onClick={(event) => {
                 event.preventDefault();
                 onNavigateHome("projects");
               }}
-              className="px-8 py-4 bg-white text-black font-semibold rounded-full hover:bg-gray-200 transition-all transform hover:scale-105"
+              className="w-full rounded-full bg-white px-8 py-4 text-center font-semibold text-black transition-all hover:bg-gray-200 sm:w-auto"
             >
               View Projects
             </a>
@@ -280,7 +290,7 @@ const Hero = ({ onNavigateHome }: { onNavigateHome: (sectionId: string) => void 
                 event.preventDefault();
                 onNavigateHome("contact");
               }}
-              className="px-8 py-4 bg-transparent border border-white/20 text-white font-semibold rounded-full hover:bg-white/5 transition-all"
+              className="w-full rounded-full border border-white/20 bg-transparent px-8 py-4 text-center font-semibold text-white transition-all hover:bg-white/5 sm:w-auto"
             >
               Contact Me
             </a>
@@ -292,24 +302,59 @@ const Hero = ({ onNavigateHome }: { onNavigateHome: (sectionId: string) => void 
 };
 
 const About = () => {
+  const [copiedEmail, setCopiedEmail] = useState(false);
+
+  useEffect(() => {
+    if (!copiedEmail) return;
+
+    const timeout = window.setTimeout(() => {
+      setCopiedEmail(false);
+    }, 1600);
+
+    return () => window.clearTimeout(timeout);
+  }, [copiedEmail]);
+
+  const handleCopyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText("daniel.inocentes30@gmail.com");
+      setCopiedEmail(true);
+    } catch {
+      setCopiedEmail(false);
+    }
+  };
+
   return (
-    <section id="about" className="py-24 px-6 bg-black/50">
+    <section id="about" className="bg-black/50 px-4 py-20 sm:px-6 sm:py-24">
       <div className="max-w-5xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-16 items-end">
+        <div className="grid items-end gap-10 md:grid-cols-2 md:gap-16">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="relative"
+            className="relative mx-auto w-full max-w-sm md:max-w-none"
           >
-            <div className="aspect-square bg-gray-900 rounded-2xl overflow-hidden border border-white/5 relative group">
-              <div className="absolute inset-0 bg-gradient-to-tr from-brand-accent/20 to-transparent transition-opacity group-hover:opacity-100 opacity-0" />
-              <img
-                src={profileImage}
-                alt="Profile"
-                className="h-full w-full object-cover"
-              />
-            </div>
+            <BorderGlow
+              className="rounded-[28px]"
+              edgeSensitivity={26}
+              glowColor="210 95 72"
+              backgroundColor="#0f172a"
+              borderRadius={28}
+              glowRadius={34}
+              glowIntensity={0.95}
+              coneSpread={22}
+              animated={true}
+              fillOpacity={0.38}
+              colors={["#38bdf8", "#3b82f6", "#93c5fd"]}
+            >
+              <div className="aspect-square overflow-hidden rounded-[28px] bg-gray-900 relative group">
+                <div className="absolute inset-0 bg-gradient-to-tr from-brand-accent/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                <img
+                  src={profileImage}
+                  alt="Profile"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            </BorderGlow>
             <div className="absolute -bottom-6 -right-6 h-32 w-32 bg-brand-accent/10 blur-3xl rounded-full" />
           </motion.div>
 
@@ -320,46 +365,64 @@ const About = () => {
             className="flex h-full"
           >
             <div className="flex flex-1 flex-col">
-              <div className="space-y-6 text-gray-400 text-lg leading-relaxed">
-                <h2 className="text-3xl font-bold text-white">About Me</h2>
+              <div className="space-y-6 text-base leading-relaxed text-gray-400 sm:text-lg">
+                <ScrollFloat
+                  containerClassName="text-left"
+                  textClassName="!text-3xl text-white md:!text-4xl"
+                  scrollStart="top bottom-=10%"
+                  scrollEnd="bottom center"
+                  stagger={0.02}
+                >
+                  About Me
+                </ScrollFloat>
                 <p>
                   I am a passionate aspiring developer with a strong focus on building practical applications that solve real-world problems. My journey in tech is driven by curiosity and a commitment to continuous learning. Whether it's optimizing a web interface or automating a workflow with AI, I aim for clean code and high performance in every project I undertake.
                 </p>
               </div>
               <div className="h-8 shrink-0 md:h-10" />
               <div className="mt-auto p-4 bg-white/5 border border-white/5 rounded-xl space-y-4">
-                <a
-                  href="mailto:daniel.inocentes30@gmail.com"
-                  className="flex items-start gap-3 hover:text-white transition-colors"
+                <button
+                  type="button"
+                  onClick={handleCopyEmail}
+                  className="flex w-full items-start gap-3 text-left transition-colors hover:text-white"
                 >
                   <Mail size={18} className="mt-1 text-white/80" />
-                  <div>
-                    <h3 className="text-white font-semibold mb-1">Email</h3>
-                    <p className="text-sm">daniel.inocentes30@gmail.com</p>
+                  <div className="flex min-w-0 items-center gap-2">
+                    <p className="break-all text-sm">daniel.inocentes30@gmail.com</p>
+                    <AnimatePresence>
+                      {copiedEmail ? (
+                        <motion.span
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
+                          className="shrink-0 whitespace-nowrap text-xs font-semibold text-brand-accent"
+                        >
+                          Copied!
+                        </motion.span>
+                      ) : null}
+                    </AnimatePresence>
                   </div>
-                </a>
+                </button>
                 <a
                   href="https://www.facebook.com/daanieboi"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-start gap-3 hover:text-white transition-colors"
+                  className="flex items-start gap-3 break-all transition-colors hover:text-white"
                 >
                   <Facebook size={18} className="mt-1 text-white/80" />
                   <div>
-                    <h3 className="text-white font-semibold mb-1">FB</h3>
-                    <p className="text-sm">facebook.com/daanieboi</p>
+                    <h3 className="text-white font-semibold mb-1">Facebook</h3>
                   </div>
                 </a>
                 <a
                   href="https://www.instagram.com/daanie_boi/"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-start gap-3 hover:text-white transition-colors"
+                  className="flex items-start gap-3 break-all transition-colors hover:text-white"
                 >
                   <Instagram size={18} className="mt-1 text-white/80" />
                   <div>
-                    <h3 className="text-white font-semibold mb-1">IG</h3>
-                    <p className="text-sm">@daanie_boi</p>
+                    <h3 className="text-white font-semibold mb-1">Instagram</h3>
                   </div>
                 </a>
               </div>
@@ -433,12 +496,20 @@ const ProjectCard = (props: ProjectCardProps) => {
 
 const Projects = ({ onNavigateProjects }: { onNavigateProjects: () => void }) => {
   return (
-    <section id="projects" className="py-24 px-6">
+    <section id="projects" className="px-4 py-20 sm:px-6 sm:py-24">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
-          <div>
-            <h2 className="text-3xl font-bold mb-2">Featured Projects</h2>
-            <p className="text-gray-500">A selection of my recent work in web, AI, and game development.</p>
+        <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-2xl">
+            <ScrollFloat
+              containerClassName="mb-2 text-left"
+              textClassName="!text-3xl md:!text-4xl"
+              scrollStart="top bottom-=10%"
+              scrollEnd="bottom center"
+              stagger={0.02}
+            >
+              Featured Projects
+            </ScrollFloat>
+            <p className="text-gray-500 sm:text-base">A selection of my recent work in web, AI, and game development.</p>
           </div>
           <a
             href={PROJECTS_PATH}
@@ -452,7 +523,7 @@ const Projects = ({ onNavigateProjects }: { onNavigateProjects: () => void }) =>
           </a>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((project, i) => (
             <ProjectCard
               key={project.title}
@@ -473,19 +544,28 @@ const Projects = ({ onNavigateProjects }: { onNavigateProjects: () => void }) =>
 
 const ProjectsPage = ({ onNavigateHome }: { onNavigateHome: (sectionId: string) => void }) => {
   return (
-    <main className="pt-32 pb-24 px-6 min-h-screen">
+    <main className="min-h-screen px-4 pt-28 pb-20 sm:px-6 sm:pt-32 sm:pb-24">
       <section className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-16 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6"
+          className="mb-12 flex flex-col gap-6 lg:mb-16 lg:flex-row lg:items-end lg:justify-between"
         >
           <div className="max-w-3xl">
-            <span className="text-brand-accent text-sm font-semibold tracking-[0.3em] uppercase mb-4 block">
+            <span className="text-brand-accent mb-4 block text-xs font-semibold uppercase tracking-[0.22em] sm:text-sm sm:tracking-[0.3em]">
               Project Archive
             </span>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">All Projects</h1>
-            <p className="text-lg text-gray-400 leading-relaxed">
+            <ScrollFloat
+              as="h1"
+              containerClassName="mb-4 text-left"
+              textClassName="!text-4xl md:!text-6xl"
+              scrollStart="top bottom-=5%"
+              scrollEnd="bottom center"
+              stagger={0.02}
+            >
+              All Projects
+            </ScrollFloat>
+            <p className="text-base leading-relaxed text-gray-400 sm:text-lg">
               A complete list of portfolio work across automation, web applications, and product-focused builds.
             </p>
           </div>
@@ -501,7 +581,7 @@ const ProjectsPage = ({ onNavigateHome }: { onNavigateHome: (sectionId: string) 
           </a>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {projects.map((project, index) => (
             <ProjectCard
               key={project.title}
@@ -537,10 +617,18 @@ const Skills = () => {
   ];
 
   return (
-    <section id="skills" className="py-24 px-6 bg-black/30">
+    <section id="skills" className="bg-black/30 px-4 py-20 sm:px-6 sm:py-24">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold mb-12 text-center">My Skills</h2>
-        <div className="grid md:grid-cols-3 gap-8">
+        <ScrollFloat
+          containerClassName="mb-12 text-center"
+          textClassName="!text-3xl md:!text-4xl"
+          scrollStart="top bottom-=10%"
+          scrollEnd="bottom center"
+          stagger={0.02}
+        >
+          My Skills
+        </ScrollFloat>
+        <div className="grid gap-6 md:grid-cols-3 md:gap-8">
           {skillGroups.map((group, i) => (
             <motion.div
               key={group.title}
@@ -548,7 +636,7 @@ const Skills = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="p-8 border border-white/5 rounded-2xl"
+              className="rounded-2xl border border-white/5 p-6 sm:p-8"
             >
               <h3 className="text-white font-semibold text-lg mb-6 flex items-center">
                 <span className="h-1 w-4 bg-brand-accent mr-3 inline-block rounded-full" />
@@ -574,17 +662,25 @@ const Skills = () => {
 
 const Education = () => {
   return (
-    <section id="education" className="py-24 px-6">
+    <section id="education" className="px-4 py-20 sm:px-6 sm:py-24">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold mb-12 text-center text-gradient">Education</h2>
-        <div className="relative pl-8 border-l-2 border-white/5 space-y-12">
+        <ScrollFloat
+          containerClassName="mb-12 text-center"
+          textClassName="text-gradient !text-3xl md:!text-4xl"
+          scrollStart="top bottom-=10%"
+          scrollEnd="bottom center"
+          stagger={0.02}
+        >
+          Education
+        </ScrollFloat>
+        <div className="relative space-y-12 border-l-2 border-white/5 pl-6 sm:pl-8">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             className="relative"
           >
-            <div className="absolute -left-[41px] top-0 h-4 w-4 bg-brand-accent rounded-full border-4 border-black box-content" />
+            <div className="absolute -left-[33px] top-0 h-4 w-4 rounded-full border-4 border-black bg-brand-accent box-content sm:-left-[41px]" />
             <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">2022 — Present</span>
             <h3 className="text-xl font-bold mb-1">Bachelor of Science in Information Technology</h3>
             <p className="text-gray-400">Current Student / Graduating</p>
@@ -600,25 +696,33 @@ const Education = () => {
 
 const Contact = () => {
   return (
-    <section id="contact" className="py-24 px-6 bg-black/50 overflow-hidden relative">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] bg-brand-accent/5 blur-[120px] rounded-full -z-10" />
+    <section id="contact" className="relative overflow-hidden bg-black/50 px-4 py-20 sm:px-6 sm:py-24">
+      <div className="absolute top-1/2 left-1/2 -z-10 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-accent/5 blur-[100px] sm:h-[500px] sm:w-[500px] sm:blur-[120px]" />
       
       <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-16">
+        <div className="grid gap-10 md:grid-cols-2 md:gap-16">
           <div>
-            <h2 className="text-4xl font-bold mb-6">Let's Connect</h2>
-            <p className="text-gray-400 text-lg mb-10 max-w-md">
+            <ScrollFloat
+              containerClassName="mb-6 text-left"
+              textClassName="!text-4xl md:!text-5xl"
+              scrollStart="top bottom-=10%"
+              scrollEnd="bottom center"
+              stagger={0.02}
+            >
+              Let's Connect
+            </ScrollFloat>
+            <p className="mb-10 max-w-md text-base text-gray-400 sm:text-lg">
               I'm always open to discussing new projects, creative ideas, or opportunities to be part of your visions.
             </p>
             
             <div className="space-y-6">
-              <a href="mailto:daniel.inocentes30@gmail.com" className="flex items-center group">
-                <div className="h-12 w-12 bg-white/5 rounded-full flex items-center justify-center mr-4 group-hover:bg-brand-accent/20 transition-colors">
+              <a href="mailto:daniel.inocentes30@gmail.com" className="group flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/5 transition-colors group-hover:bg-brand-accent/20">
                   <Mail className="text-gray-400 group-hover:text-white transition-colors" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Email Me</p>
-                  <p className="text-gray-200">daniel.inocentes30@gmail.com</p>
+                  <p className="break-all text-gray-200">daniel.inocentes30@gmail.com</p>
                 </div>
               </a>
               
@@ -647,10 +751,10 @@ const Contact = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="p-8 glass-card rounded-3xl"
+            className="glass-card rounded-3xl p-6 sm:p-8"
           >
             <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider pl-1">Name</label>
                   <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-accent/50 transition-colors" placeholder="John Doe" />
@@ -678,12 +782,12 @@ const Contact = () => {
 
 const Footer = () => {
   return (
-    <footer className="py-12 px-6 border-t border-white/5 bg-black">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-        <p className="text-gray-500 text-sm">
+    <footer className="border-t border-white/5 bg-black px-4 py-12 sm:px-6">
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 text-center md:flex-row md:text-left">
+        <p className="text-sm text-gray-500">
           © 2026 Jose Danielle Inocentes. Built with precision.
         </p>
-        <div className="flex items-center space-x-6 text-sm text-gray-500">
+        <div className="flex flex-col items-center gap-3 text-sm text-gray-500 sm:flex-row sm:gap-6">
           <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
           <a href="#" className="hover:text-white transition-colors">Credits</a>
         </div>
@@ -695,6 +799,7 @@ const Footer = () => {
 export default function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [pendingSectionId, setPendingSectionId] = useState<string | null>(null);
+  const [showStartupIntro, setShowStartupIntro] = useState(true);
 
   useEffect(() => {
     const syncRoute = () => {
@@ -707,6 +812,14 @@ export default function App() {
 
     return () => window.removeEventListener("popstate", syncRoute);
   }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = showStartupIntro ? "hidden" : "";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showStartupIntro]);
 
   useEffect(() => {
     if (currentPath !== HOME_PATH || !pendingSectionId) return;
@@ -737,6 +850,7 @@ export default function App() {
 
   return (
     <div className="selection:bg-brand-accent/30 selection:text-white">
+      <StartupIntro active={showStartupIntro} onComplete={() => setShowStartupIntro(false)} />
       <Navbar
         currentPath={currentPath}
         onNavigateHome={navigateHome}

@@ -94,6 +94,8 @@ export default function DarkVeil({
   resolutionScale = 1,
 }: DarkVeilProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const isRunningRef = useRef(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -101,8 +103,11 @@ export default function DarkVeil({
 
     if (!canvas || !parent) return;
 
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const effectiveResolutionScale = Math.min(Math.max(resolutionScale, 0.25), 1);
+
     const renderer = new Renderer({
-      dpr: Math.min(window.devicePixelRatio, 2),
+      dpr: Math.min(window.devicePixelRatio, 1.5),
       canvas,
       alpha: true,
     });
@@ -130,8 +135,8 @@ export default function DarkVeil({
     const resize = () => {
       const width = parent.clientWidth;
       const height = parent.clientHeight;
-      const scaledWidth = Math.max(1, Math.round(width * resolutionScale));
-      const scaledHeight = Math.max(1, Math.round(height * resolutionScale));
+      const scaledWidth = Math.max(1, Math.round(width * effectiveResolutionScale));
+      const scaledHeight = Math.max(1, Math.round(height * effectiveResolutionScale));
 
       renderer.setSize(scaledWidth, scaledHeight);
       canvas.style.width = `${width}px`;
@@ -141,13 +146,13 @@ export default function DarkVeil({
 
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(parent);
-    window.addEventListener("resize", resize);
     resize();
 
     const start = performance.now();
-    let frameId = 0;
 
     const loop = () => {
+      if (!isRunningRef.current) return;
+
       program.uniforms.uTime.value = ((performance.now() - start) / 1000) * speed;
       program.uniforms.uHueShift.value = hueShift;
       program.uniforms.uNoise.value = noiseIntensity;
@@ -155,15 +160,79 @@ export default function DarkVeil({
       program.uniforms.uScanFreq.value = scanlineFrequency;
       program.uniforms.uWarp.value = warpAmount;
       renderer.render({ scene: mesh });
-      frameId = window.requestAnimationFrame(loop);
+      animationFrameRef.current = window.requestAnimationFrame(loop);
     };
 
-    loop();
+    const stop = () => {
+      isRunningRef.current = false;
+
+      if (animationFrameRef.current !== null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
+
+    const startLoop = () => {
+      if (isRunningRef.current || prefersReducedMotion.matches || document.hidden) {
+        return;
+      }
+
+      isRunningRef.current = true;
+      animationFrameRef.current = window.requestAnimationFrame(loop);
+    };
+
+    const renderStaticFrame = () => {
+      program.uniforms.uTime.value = 0;
+      renderer.render({ scene: mesh });
+    };
+
+    const intersectionObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          startLoop();
+          return;
+        }
+
+        stop();
+      },
+      { threshold: 0.05 }
+    );
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stop();
+        return;
+      }
+
+      startLoop();
+    };
+
+    const handleMotionPreference = () => {
+      if (prefersReducedMotion.matches) {
+        stop();
+        renderStaticFrame();
+        return;
+      }
+
+      startLoop();
+    };
+
+    intersectionObserver.observe(parent);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    prefersReducedMotion.addEventListener("change", handleMotionPreference);
+
+    if (prefersReducedMotion.matches) {
+      renderStaticFrame();
+    } else {
+      startLoop();
+    }
 
     return () => {
-      window.cancelAnimationFrame(frameId);
+      stop();
+      intersectionObserver.disconnect();
       resizeObserver.disconnect();
-      window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      prefersReducedMotion.removeEventListener("change", handleMotionPreference);
     };
   }, [hueShift, noiseIntensity, scanlineIntensity, speed, scanlineFrequency, warpAmount, resolutionScale]);
 
