@@ -25,7 +25,7 @@ import BorderGlow from "./components/BorderGlow";
 import DarkVeil from "./components/DarkVeil";
 import ScrollFloat from "./components/ScrollFloat";
 import StartupIntro from "./components/StartupIntro";
-import profileImage from "../profile2.jpg";
+import profileImage from "../profile.png";
 
 // --- Components ---
 
@@ -229,10 +229,11 @@ const Navbar = ({
   );
 };
 
-const TypingAnimation = ({ text }: { text: string }) => {
+const TypingAnimation = ({ text, active = true }: { text: string; active?: boolean }) => {
   const [displayText, setDisplayText] = useState("");
 
   useEffect(() => {
+    if (!active) return;
     if (displayText.length >= text.length) return;
 
     const timeout = setTimeout(() => {
@@ -240,7 +241,7 @@ const TypingAnimation = ({ text }: { text: string }) => {
     }, 50);
 
     return () => clearTimeout(timeout);
-  }, [displayText, text]);
+  }, [active, displayText, text]);
 
   return (
     <span className="border-r-2 border-brand-accent pr-1">
@@ -249,7 +250,13 @@ const TypingAnimation = ({ text }: { text: string }) => {
   );
 };
 
-const Hero = ({ onNavigateHome }: { onNavigateHome: (sectionId: string) => void }) => {
+const Hero = ({
+  onNavigateHome,
+  startTyping,
+}: {
+  onNavigateHome: (sectionId: string) => void;
+  startTyping: boolean;
+}) => {
   return (
     <section id="hero" className="relative isolate flex min-h-screen items-center justify-center overflow-hidden px-4 pt-24 pb-16 sm:px-6 sm:pt-20">
       <HeroVeil />
@@ -270,7 +277,10 @@ const Hero = ({ onNavigateHome }: { onNavigateHome: (sectionId: string) => void 
             className="mx-auto mb-6 justify-center text-center text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-7xl"
           />
           <div className="mb-8 min-h-[4.5rem] text-base font-medium leading-relaxed text-gray-400 sm:min-h-[3.75rem] sm:text-lg md:text-2xl">
-            <TypingAnimation text="Aspiring Software Developer | Web Developer | AI Automation" />
+            <TypingAnimation
+              text="Aspiring Software Developer | Web Developer | AI Automation"
+              active={startTyping}
+            />
           </div>
 
           <div className="flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
@@ -346,12 +356,17 @@ const About = () => {
               fillOpacity={0.38}
               colors={["#38bdf8", "#3b82f6", "#93c5fd"]}
             >
-              <div className="aspect-square overflow-hidden rounded-[28px] bg-gray-900 relative group">
+              <div className="aspect-[2229/2505] overflow-hidden rounded-[28px] bg-gray-900 relative group">
                 <div className="absolute inset-0 bg-gradient-to-tr from-brand-accent/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
                 <img
                   src={profileImage}
                   alt="Profile"
-                  className="h-full w-full object-cover"
+                  width={2229}
+                  height={2505}
+                  decoding="async"
+                  fetchPriority="high"
+                  sizes="(min-width: 768px) 448px, min(384px, 100vw)"
+                  className="h-full w-full object-cover object-center"
                 />
               </div>
             </BorderGlow>
@@ -603,16 +618,16 @@ const ProjectsPage = ({ onNavigateHome }: { onNavigateHome: (sectionId: string) 
 const Skills = () => {
   const skillGroups = [
     {
-      title: "Programming Languages",
-      skills: ["PHP", "Java", "C", "JavaScript", "SQL", "CSS", "React", "Tailwind CSS", "TypeScript"]
+      title: "Programming",
+      skills: ["Java", "TypeScript", "PHP", "Python"]
     },
     {
-      title: "AI & Tools",
-      skills: ["Python", "Git", "Power BI", "Prompt Engineering", "LLM Workflows"]
+      title: "Technical Tools",
+      skills: ["MySQL", "Figma", "Canva", "Adobe", "AI Workflow Automation"]
     },
     {
       title: "Soft Skills",
-      skills: ["Project Management", "Communication", "Collaborative", "Great Leader", "Critical Thinking", "Adaptability", "Emotional Intelligence"]
+      skills: ["Project Management", "Great Leadership", "Good Work Ethic", "Adaptability"]
     }
   ];
 
@@ -661,33 +676,78 @@ const Skills = () => {
 };
 
 const Education = () => {
+  const educationItems = [
+    {
+      period: "2022 - Present",
+      level: "Tertiary",
+      title: "Bachelor of Science in Information Technology",
+      school: "University of Cebu Lapu-Lapu and Mandaue",
+      description:
+        "Currently pursuing a BSIT degree with focus areas in software development, database management, AI workflow automation, and project-based systems."
+    },
+    {
+      period: "2020 - 2022",
+      level: "Secondary",
+      title: "TechVoc - ICT (Information and Communication Technology)",
+      school: "University of Cebu Lapu-Lapu and Mandaue",
+      description:
+        "Completed ICT-focused senior high school training covering foundational computing, technical skills, and applied technology concepts."
+    },
+    {
+      period: "2016 - 2020",
+      level: "Junior High School",
+      title: "Junior High School",
+      school: "University of Cebu Lapu-Lapu and Mandaue",
+      description:
+        "Built core academic foundations while developing an early interest in technology and practical problem solving."
+    },
+    {
+      period: "2010 - 2016",
+      level: "Primary",
+      title: "Basic Education",
+      school: "Pusok Elementary School",
+      description:
+        "Completed primary education and developed the learning foundations that support continued academic growth."
+    }
+  ];
+
   return (
     <section id="education" className="px-4 py-20 sm:px-6 sm:py-24">
       <div className="max-w-4xl mx-auto">
-        <ScrollFloat
-          containerClassName="mb-12 text-center"
-          textClassName="text-gradient !text-3xl md:!text-4xl"
-          scrollStart="top bottom-=10%"
-          scrollEnd="bottom center"
-          stagger={0.02}
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-12 text-center"
         >
-          Education
-        </ScrollFloat>
+          <span className="mb-3 block text-xs font-bold uppercase tracking-[0.35em] text-brand-accent">
+            Education
+          </span>
+          <h2 className="text-gradient text-3xl font-bold tracking-tight md:text-4xl">
+            Academic Background
+          </h2>
+        </motion.div>
         <div className="relative space-y-12 border-l-2 border-white/5 pl-6 sm:pl-8">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="relative"
-          >
-            <div className="absolute -left-[33px] top-0 h-4 w-4 rounded-full border-4 border-black bg-brand-accent box-content sm:-left-[41px]" />
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">2022 — Present</span>
-            <h3 className="text-xl font-bold mb-1">Bachelor of Science in Information Technology</h3>
-            <p className="text-gray-400">Current Student / Graduating</p>
-            <p className="mt-4 text-gray-500 leading-relaxed max-w-2xl">
-              Focusing on core computing principles, software engineering, and data analytics. Actively participating in technical seminars and project-based learning.
-            </p>
-          </motion.div>
+          {educationItems.map((item, index) => (
+            <motion.div
+              key={`${item.period}-${item.title}`}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.08 }}
+              className="relative"
+            >
+              <div className="absolute -left-[33px] top-0 h-4 w-4 rounded-full border-4 border-black bg-brand-accent box-content sm:-left-[41px]" />
+              <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-gray-500">
+                {item.period} - {item.level}
+              </span>
+              <h3 className="mb-1 text-xl font-bold text-white">{item.title}</h3>
+              <p className="text-gray-400">{item.school}</p>
+              <p className="mt-4 max-w-2xl leading-relaxed text-gray-500">
+                {item.description}
+              </p>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
@@ -785,7 +845,7 @@ const Footer = () => {
     <footer className="border-t border-white/5 bg-black px-4 py-12 sm:px-6">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 text-center md:flex-row md:text-left">
         <p className="text-sm text-gray-500">
-          © 2026 Jose Danielle Inocentes. Built with precision.
+          Copyright 2026 Jose Danielle Inocentes. Built with precision.
         </p>
         <div className="flex flex-col items-center gap-3 text-sm text-gray-500 sm:flex-row sm:gap-6">
           <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
@@ -800,6 +860,7 @@ export default function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [pendingSectionId, setPendingSectionId] = useState<string | null>(null);
   const [showStartupIntro, setShowStartupIntro] = useState(true);
+  const [startHeroTyping, setStartHeroTyping] = useState(false);
 
   useEffect(() => {
     const syncRoute = () => {
@@ -850,7 +911,11 @@ export default function App() {
 
   return (
     <div className="selection:bg-brand-accent/30 selection:text-white">
-      <StartupIntro active={showStartupIntro} onComplete={() => setShowStartupIntro(false)} />
+      <StartupIntro
+        active={showStartupIntro}
+        onComplete={() => setShowStartupIntro(false)}
+        onExitComplete={() => setStartHeroTyping(true)}
+      />
       <Navbar
         currentPath={currentPath}
         onNavigateHome={navigateHome}
@@ -860,7 +925,7 @@ export default function App() {
         <ProjectsPage onNavigateHome={navigateHome} />
       ) : (
         <main>
-          <Hero onNavigateHome={navigateHome} />
+          <Hero onNavigateHome={navigateHome} startTyping={startHeroTyping} />
           <About />
           <Projects onNavigateProjects={navigateToProjects} />
           <Skills />

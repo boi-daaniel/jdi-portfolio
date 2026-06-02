@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
 const buildKeyframes = (
   from: Record<string, string | number>,
@@ -50,24 +50,24 @@ export default function BlurText({
 }: BlurTextProps) {
   const elements = animateBy === "words" ? text.split(" ") : text.split("");
   const [inView, setInView] = useState(false);
-  const ref = useRef<HTMLElement | null>(null);
+  const [rootElement, setRootElement] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!rootElement) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setInView(true);
-          observer.unobserve(ref.current!);
+          observer.unobserve(rootElement);
         }
       },
       { threshold, rootMargin }
     );
 
-    observer.observe(ref.current);
+    observer.observe(rootElement);
     return () => observer.disconnect();
-  }, [threshold, rootMargin]);
+  }, [rootElement, threshold, rootMargin]);
 
   const defaultFrom = useMemo(
     () =>
@@ -100,7 +100,7 @@ export default function BlurText({
 
   return (
     <Tag
-      ref={ref}
+      ref={setRootElement}
       className={className}
       style={{ display: "flex", flexWrap: "wrap", ...style }}
     >

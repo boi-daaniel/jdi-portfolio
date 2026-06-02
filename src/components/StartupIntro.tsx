@@ -6,11 +6,12 @@ import "./StartupIntro.css";
 type StartupIntroProps = {
   active: boolean;
   onComplete: () => void;
+  onExitComplete?: () => void;
 };
 
 const INTRO_DURATION_MS = 3200;
 
-export default function StartupIntro({ active, onComplete }: StartupIntroProps) {
+export default function StartupIntro({ active, onComplete, onExitComplete }: StartupIntroProps) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -42,7 +43,7 @@ export default function StartupIntro({ active, onComplete }: StartupIntroProps) 
   const progressLabel = useMemo(() => `${Math.round(progress).toString().padStart(2, "0")}`, [progress]);
 
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={onExitComplete}>
       {active ? (
         <motion.div
           className="startup-intro"
